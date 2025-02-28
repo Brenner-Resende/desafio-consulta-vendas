@@ -14,9 +14,13 @@ import com.devsuperior.dsmeta.entities.Sale;
 
 public interface SaleRepository extends JpaRepository<Sale, Long> {
 
-	@Query("SELECT s FROM Sale s " +
-	           "WHERE s.date BETWEEN :minDate AND :maxDate " +
-	           "AND LOWER(s.seller.name) LIKE LOWER(CONCAT('%', :sellerName, '%'))")
+	@Query(value = "SELECT s FROM Sale s " +
+		       "JOIN FETCH s.seller seller " + // Carrega o vendedor em uma única consulta
+		       "WHERE s.date BETWEEN :minDate AND :maxDate " +
+		       "AND LOWER(seller.name) LIKE LOWER(CONCAT('%', :sellerName, '%'))",
+		       countQuery = "SELECT COUNT(s) FROM Sale s " +
+	                    "WHERE s.date BETWEEN :minDate AND :maxDate " +
+	                    "AND LOWER(s.seller.name) LIKE LOWER(CONCAT('%', :sellerName, '%'))")
 	    Page<Sale> report(@Param("minDate") LocalDate minDate,
 	                         @Param("maxDate") LocalDate maxDate,
 	                         @Param("sellerName") String sellerName,
